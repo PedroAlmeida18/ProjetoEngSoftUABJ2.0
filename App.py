@@ -16,6 +16,7 @@ from cor import cores, escolha_cor
 from territorio import receber_carta_território
 from objetivos import escolher_objetivo_aleatorio
 from exercito import receber_exercito_inicial, colocar_exercito
+from strategy_ezequiel.ataque import atacar_territorio
 import random
 
 app = FastAPI()
@@ -60,3 +61,7 @@ async def recebe_exercitos():
 @app.get("/meus-territorios/{território}/{valor}")
 async def por_exercito(territorios: str, valor: int):
     return colocar_exercito(territorios, valor)
+
+@app.get("/realizar-ataque/{territorio_atacante}/{territorio_defensor}/{tipo_ataque}")
+async def realizar_ataque(territorio_atacante, territorio_defensor, tipo_ataque):
+    return atacar_territorio(territorio_atacante, territorio_defensor, tipo_ataque)
