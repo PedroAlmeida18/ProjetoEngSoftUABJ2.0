@@ -11,17 +11,23 @@
 #localHost/Distribuir/Exercitos/Distribuir(Post)
 #Quais recursos : Jogo War
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from cor import cores, escolha_cor
-from territorio import receber_carta_território
 from objetivos import escolher_objetivo_aleatorio
 from exercito import receber_exercito_inicial, colocar_exercito
 from strategy_ezequiel.ataque import atacar_territorio
+from singleton_matheus.receber_carta import GerenciadorCartas
+from typing import List
 import random
 
 app = FastAPI()
 
-territorios_recebido =[]
+gerenciador_cartas = GerenciadorCartas()
+
+class TerritoriosConquistados(BaseModel):
+    territorios: List[str]
+
 
 @app.get("/")
 async def root():
@@ -49,10 +55,30 @@ async def definir_ordem():
         "Mensagem": "Para saber seu território inicial acesse a rota meus-territorios",
     }
 
+@app.get("/receber-cartas-iniciais/{jogador_id}")
+def receber_cartas_iniciais(jogador_id: str):
+    cartas_iniciais = gerenciador_cartas.entregar_cartas_iniciais(jogador_id)
+    return {"cartas_iniciais": [carta['Território'] for carta in cartas_iniciais]}
 
-@app.get("/meus-territorios")
-async def meus_territorios():
-    return receber_carta_território()
+
+
+@app.get("/receber-cartas-fim-turno/{jogador_id}")
+def receber_cartas_fim_turno(jogador_id: str, territorios_conquistados: list[str]):
+    cartas_recebidas = []
+    
+    for _ in territorios_conquistados:
+        carta = gerenciador_cartas.entregar_carta_aleatoria(jogador_id)
+        if carta:
+            cartas_recebidas.append(carta['Território'])
+        else:
+            return {"mensagem": "Não há mais cartas disponíveis."}
+    
+    return {"cartas_recebidas": cartas_recebidas}
+
+@app.get("/obter-cartas/{jogador_id}")
+def obter_cartas(jogador_id: str):
+    cartas = gerenciador_cartas.obter_cartas_jogador(jogador_id)
+    return {"cartas_do_jogador": [carta['Território'] for carta in cartas]}
 
 @app.get("/recebe-exercitos")
 async def recebe_exercitos():
