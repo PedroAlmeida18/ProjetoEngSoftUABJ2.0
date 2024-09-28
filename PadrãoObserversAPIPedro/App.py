@@ -198,6 +198,7 @@ async def por_exercito(nome_territorio: str = Query(...), valor_exercito: int = 
 async def iniciar_rodada():
     global rodada_atual
     rodada_atual += 1  
+    subject.notify(f"A rodada que está iniciando é a :  {rodada_atual}° ")
     return f"""
         <html>
             <head></head>
