@@ -138,7 +138,8 @@ async def definir_ordem(numero_Participantes: int = Query(...)):
     for i in range(numero_Participantes):
         ordem = ordem2[i]
         ordem_jogadores.append(f"<p>A ordem do jogador {i + 1}: {ordem}° a jogar</p>")
-       # subject.notify(f"A ordem do jogador {i + 1}: {ordem}° a jogar")
+        jogadores[i].update(f"A sua ordem é: {ordem}° a jogar")
+        subject.notify(f"A ordem do jogador {i + 1}: {ordem}° a jogar")
     return "".join(ordem_jogadores)
 
 @app.get("/meus-territorios", response_class=HTMLResponse)
